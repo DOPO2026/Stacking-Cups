@@ -4,8 +4,7 @@
  * @author Rodriguez-Villamizar
  * @version 1 (15/02/2026)
  */
-public class Cup
-{
+public class Cup extends StackItem {
     private int nCup;
     private Rectangle view;
     private int height;
@@ -20,7 +19,10 @@ public class Cup
      * Constructor for objects of class Cup
      */
     public Cup(int nCup, String color){
-        this.nCup=nCup;
+        // Llamamos al constructor de StakItem 
+        super("cup", nCup, color);
+
+        this.nCup = nCup;
         this.height = (2*nCup-1) *SCALE;
         this.width = (nCup*10)+30;
         this.color = color;
