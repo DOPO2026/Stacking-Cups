@@ -5,6 +5,7 @@
  * @1 (15/02/2026)
  */
 public class Lid {
+<<<<<<< HEAD
     public static final int SCALE = 20;
     private Rectangle lid;
     private int nCup; 
@@ -27,5 +28,26 @@ public class Lid {
     
     public void makeInvisible() {
         lid.makeInvisible();
+    private int number;
+    private Rectangle figure;
+
+    public Lid(int number, String color) {
+        this.number = number;
+        this.figure = new Rectangle();
+        this.figure.changeSize(10, 40);
+        this.figure.changeColor(color);
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public void makeVisible() {
+        figure.makeVisible();
+    }
+
+    public void makeInvisible() {
+        figure.makeInvisible();
+ origin/main
     }
 }
