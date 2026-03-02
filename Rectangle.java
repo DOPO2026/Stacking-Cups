@@ -159,7 +159,7 @@ public class Rectangle{
         draw();
     }
 
-    /*
+    /**
      * Draw the rectangle with current specifications on screen.
      */
 

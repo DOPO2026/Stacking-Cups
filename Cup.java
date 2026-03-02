@@ -10,6 +10,8 @@ public class Cup
     private Rectangle view;
     private int height;
     private int width;
+    private int x; 
+    private int y;
     private String color;
     private boolean isVisible;
     private static final int SCALE=20;
@@ -27,7 +29,13 @@ public class Cup
         view.changeColor(color);
         view.changeSize(this.height,this.width);
     }
-
+    public int getHeight() {
+        return this.height;
+    }
+    public void move(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
     /**
      * Make the cup visible. If it was already visible, do nothing.
      */
