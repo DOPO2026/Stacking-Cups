@@ -5,29 +5,7 @@
  * @1 (15/02/2026)
  */
 public class Lid {
-<<<<<<< HEAD
-    public static final int SCALE = 20;
-    private Rectangle lid;
-    private int nCup; 
 
-    public Lid(int nCup, int size, String color) {
-        this.nCup = nCup;
-        int height = 1 * SCALE;
-        int width = (nCup * 10) + 40;        
-        lid = new Rectangle();
-        lid.changeColor(color);
-        lid.changeSize(height, width);
-        }
-        
-    /**
-     * Make the lid visible. If it was already visible, do nothing.
-     */
-    public void makeVisible() {
-        lid.makeVisible();
-        }
-    
-    public void makeInvisible() {
-        lid.makeInvisible();
     private int number;
     private Rectangle figure;
 
@@ -48,6 +26,5 @@ public class Lid {
 
     public void makeInvisible() {
         figure.makeInvisible();
- origin/main
     }
 }
