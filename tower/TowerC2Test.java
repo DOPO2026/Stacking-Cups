@@ -1,3 +1,5 @@
+package tower;
+
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -20,7 +22,7 @@ public class TowerC2Test{
         Tower tower = new Tower(3);
         
         // Intercambia la taza 1 con la taza 3
-        tower.swap("cup", 1, "cup", 3);
+        tower.swap(new String[]{"cup", "1"}, new String[]{"cup", "3"});
         
         assertTrue("El intercambio debería ser exitoso", tower.ok());
     }
@@ -30,7 +32,7 @@ public class TowerC2Test{
         Tower tower = new Tower(2); 
         
         // Intenta intercambiar con una taza que no existe (ej. taza 5)
-        tower.swap("cup", 1, "cup", 5);
+        tower.swap(new String[]{"cup", "1"}, new String[]{"cup", "5"});
         
         assertFalse("El intercambio debería fallar porque la taza 5 no existe", tower.ok());
     }

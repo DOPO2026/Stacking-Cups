@@ -1,3 +1,6 @@
+package tower;
+
+import shapes.Rectangle;
 import javax.swing.JOptionPane;
 import java.util.ArrayList;
 import java.util.List;
@@ -68,15 +71,12 @@ public class Tower {
             }
         }
     
-            if (found) {
-                ok = true;
-                // updateDisplay();
-            } else {
-                ok = false;
-            if (isVisible) {
-                javax.swing.JOptionPane.showMessageDialog(null, 
-                    "Error: No hay tazas para eliminar de la torre.");
-            }
+        if (found) {
+            ok = true;
+            updateDisplay();
+        } else {
+            ok = false;
+            showError("No hay tazas para eliminar de la torre.");
         }
     }
 
@@ -119,6 +119,7 @@ public class Tower {
             }
         }
         ok = false;
+        showError("No hay tapas para eliminar de la torre.");
     }
 
     public void removeLid(int i) {
@@ -150,37 +151,34 @@ public class Tower {
     }
 
     /**
-     * Calcula la altura total de la torre usando la fórmula exacta del Problema J.
+     * Calcula la altura total de la torre en centimetros usando la formula del Problema J.
      */
     public int height() {
         if (items.isEmpty()) return 0;
         
         int[] baseY = new int[items.size()];
-        int maxHeight = 0;
+        int maxH = 0;
         
         for (int i = 0; i < items.size(); i++) {
             StackItem current = items.get(i);
-            int currentBaseY = 0; // Por defecto cae hasta el suelo (0)
+            int currentBaseY = 0;
             
-            // Comparamos la pieza actual con TODAS las que están debajo de ella
             for (int j = 0; j < i; j++) {
                 StackItem previous = items.get(j);
                 int interactionY = 0;
                 
                 if (current.getType().equals("cup") && previous.getType().equals("cup")) {
                     if (current.getNumber() < previous.getNumber()) {
-                        // Cabe dentro: se apoya en el fondo interior (1 cm = 20 px)
-                        interactionY = baseY[j] + 20; 
+                        // Cabe dentro: se apoya en el fondo interior (1 cm)
+                        interactionY = baseY[j] + 1; 
                     } else {
-                        // No cabe: se apoya en el borde superior de la taza
+                        // No cabe: se apoya en el borde superior
                         interactionY = baseY[j] + previous.getHeight();
                     }
                 } else {
-                    // Para tapas, nada entra en ellas y ellas no entran en nada
                     interactionY = baseY[j] + previous.getHeight();
                 }
                 
-                // La pieza se detiene en la restricción más alta que encuentre
                 if (interactionY > currentBaseY) {
                     currentBaseY = interactionY;
                 }
@@ -189,14 +187,13 @@ public class Tower {
             baseY[i] = currentBaseY;
             int currentTopY = currentBaseY + current.getHeight();
             
-            // Evaluamos si esta pieza coronó la torre como la más alta
-            if (currentTopY > maxHeight) {
-                maxHeight = currentTopY;
+            if (currentTopY > maxH) {
+                maxH = currentTopY;
             }
         }
         
         ok = true;
-        return maxHeight;
+        return maxH;
     }
 
     public int[] lidedCups() {
@@ -273,27 +270,85 @@ public class Tower {
         }
     }
 
+    private static final int SCALE_PX = 10; // 1 cm = 10 pixeles
+    private static final int BASE_Y = 280; // base de la torre en pixeles (cerca del fondo del canvas 300)
+    private static final int CENTER_X = 150; // centro horizontal del canvas 300
+
     private void updateDisplay() {
         if (!isVisible) return;
         
+        // Primero ocultamos todo para redibujar limpio
         for (StackItem item : items) {
+            item.makeInvisible();
+        }
+        
+        // Calculamos posiciones usando la misma logica de height()
+        int[] baseYcm = new int[items.size()];
+        
+        for (int i = 0; i < items.size(); i++) {
+            StackItem current = items.get(i);
+            int currentBaseY = 0;
+            
+            for (int j = 0; j < i; j++) {
+                StackItem previous = items.get(j);
+                int interactionY = 0;
+                
+                if (current.getType().equals("cup") && previous.getType().equals("cup")) {
+                    if (current.getNumber() < previous.getNumber()) {
+                        interactionY = baseYcm[j] + 1;
+                    } else {
+                        interactionY = baseYcm[j] + previous.getHeight();
+                    }
+                } else {
+                    interactionY = baseYcm[j] + previous.getHeight();
+                }
+                
+                if (interactionY > currentBaseY) {
+                    currentBaseY = interactionY;
+                }
+            }
+            
+            baseYcm[i] = currentBaseY;
+        }
+        
+        // Posicionamos cada item visualmente
+        for (int i = 0; i < items.size(); i++) {
+            StackItem item = items.get(i);
+            int heightPx = item.getHeight() * SCALE_PX;
+            int widthPx = getItemWidth(item);
+            
+            int pixelX = CENTER_X - (widthPx / 2);
+            int pixelY = BASE_Y - (baseYcm[i] * SCALE_PX) - heightPx;
+            
+            item.move(pixelX, pixelY);
             item.makeVisible();
         }
     }
     
+    /**
+     * Retorna el ancho en pixeles de un item para centrarlo.
+     */
+    private int getItemWidth(StackItem item) {
+        if (item.getType().equals("cup")) {
+            return (item.getNumber() * 10) + 30;
+        } else {
+            return 40; // ancho fijo de las tapas
+        }
+    }
+    
     private void drawHeightMarks() {
-        int escala = 10; // 1 cm = 10 píxeles
-        int base = 500;  // Eje Y de la base
+        int maxMarks = Math.min(maxHeight, BASE_Y / SCALE_PX); // no exceder el canvas
         
-        for (int h = 0; h <= maxHeight; h++) {
+        for (int h = 0; h <= maxMarks; h++) {
             Rectangle marca = new Rectangle();
-            marca.changeSize(1, 10); // Línea de 1px de alto y 10px de ancho 
+            marca.changeSize(1, 10);
             marca.changeColor("black");
             
-            // Ajustar posición: El default es (70, 15). 
-            // Lo movemos a la posición deseada restando/sumando la diferencia.
-            marca.moveHorizontal(10 - 70); // Queremos que X sea 10
-            marca.moveVertical((base - (h * escala)) - 15);
+            // Mover desde default (70,15) a posicion deseada
+            int targetX = 5;
+            int targetY = BASE_Y - (h * SCALE_PX);
+            marca.moveHorizontal(targetX - 70);
+            marca.moveVertical(targetY - 15);
             
             marca.makeVisible();
         }
@@ -301,8 +356,15 @@ public class Tower {
 
     /**
      * Intercambia las posiciones de dos elementos en la torre.
+     * @param o1 arreglo {tipo, numero} del primer elemento. Ej: {"cup","4"}
+     * @param o2 arreglo {tipo, numero} del segundo elemento. Ej: {"lid","4"}
      */
-    public void swap(String type1, int no1, String type2, int no2) {
+    public void swap(String[] o1, String[] o2) {
+        String type1 = o1[0];
+        int no1 = Integer.parseInt(o1[1]);
+        String type2 = o2[0];
+        int no2 = Integer.parseInt(o2[1]);
+        
         int index1 = -1; 
         int index2 = -1;
         
@@ -319,12 +381,12 @@ public class Tower {
         }
         
         if (index1 != -1 && index2 != -1) {
-            Collections.swap(items, index1, index2); // Esta herramienta de Java hace el intercambio
+            Collections.swap(items, index1, index2);
             ok = true;
             updateDisplay();
         } else {
             ok = false;
-            showError("No se pudieron encontrar ambos elementos (" + type1 + " " + no1 + " y " + type2 + " " + no2 + ") para intercambiar.");
+            showError("No se pudieron encontrar ambos elementos para intercambiar.");
         }
     }
     
@@ -347,41 +409,35 @@ public class Tower {
     
     /**
      * Sugiere un intercambio que reduzca la altura total de la torre.
-     * Retorna un arreglo con [tipo1, numero1, tipo2, numero2].
+     * Retorna un arreglo {{tipo1, numero1}, {tipo2, numero2}}.
      */
-    public String[] swapToReduce() {
+    public String[][] swapToReduce() {
         int currentHeight = height();
         
         for (int i = 0; i < items.size(); i++) {
             for (int j = i + 1; j < items.size(); j++) {
-                // Intercambiamos temporalmente las posiciones
                 Collections.swap(items, i, j);
-                
-                // Calculamos la nueva altura
                 int newHeight = height();
                 
-                // Si la altura disminuye, encontramos una solución
                 if (newHeight < currentHeight) {
-                    StackItem originalI = items.get(j); // Tras el swap, el original de 'i' está en 'j'
-                    StackItem originalJ = items.get(i);
+                    StackItem itemI = items.get(i);
+                    StackItem itemJ = items.get(j);
                     
-                    // Revertimos el intercambio para no afectar la torre real
                     Collections.swap(items, i, j);
                     
                     ok = true;
-                    return new String[]{
-                        originalI.type, String.valueOf(originalI.number), 
-                        originalJ.type, String.valueOf(originalJ.number)
+                    return new String[][]{
+                        {itemJ.type, String.valueOf(itemJ.number)},
+                        {itemI.type, String.valueOf(itemI.number)}
                     };
                 }
                 
-                // Si no disminuye, revertimos el intercambio y seguimos probando
                 Collections.swap(items, i, j);
             }
         }
         
         ok = false;
-        return new String[]{}; // Retorna vacío si ningún intercambio reduce la altura
+        return new String[][]{}; 
     }
 
 }

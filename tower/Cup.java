@@ -1,3 +1,7 @@
+package tower;
+
+import shapes.Rectangle;
+
 /**
  * Write a description of class Cup here.
  *
@@ -29,6 +33,8 @@ public class Cup extends StackItem {
         this.width = (nCup*10)+30;
         this.color = color;
         this.isVisible = false;
+        this.x = 70;  // default de Rectangle
+        this.y = 15;  // default de Rectangle
         
         this.isCovered = false;
         
@@ -37,16 +43,21 @@ public class Cup extends StackItem {
         view.changeSize(this.height,this.width);
     }
     public int getHeight() {
-        return this.height;
+        return 2 * nCup - 1;
     }
     
-    public void move(int x, int y) {
-        this.x = x;
-        this.y = y;
+    /**
+     * Mueve la taza a una posicion absoluta en pixeles.
+     */
+    public void move(int newX, int newY) {
+        int dx = newX - this.x;
+        int dy = newY - this.y;
+        this.x = newX;
+        this.y = newY;
         
         if (view != null) {
-            view.moveHorizontal(x - 70);
-            view.moveVertical(y - 15);
+            view.moveHorizontal(dx);
+            view.moveVertical(dy);
         }
     }
     
