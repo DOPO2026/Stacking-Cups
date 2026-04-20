@@ -1,59 +1,45 @@
-<<<<<<< HEAD
-------------------------------------------------------------------------
-This is the project README file. Here, you should describe your project.
-Tell the reader (someone who does not know anything about this project)
-all they need to know. The comments should usually include at least:
-------------------------------------------------------------------------
+# Stacking Cups - DOPO
 
-PROJECT TITLE:
-PURPOSE OF PROJECT:
-VERSION or DATE:
-HOW TO START THIS PROJECT:
-AUTHORS:
-USER INSTRUCTIONS:
-=======
-Project "shapes"
-Authors: Michael Kolling and David J. Barnes
+Este proyecto es un simulador interactivo desarrollado en Java para el curso de Desarrollo Orientado por Objetos en la Escuela Colombiana de Ingeniería Julio Garavito. 
 
-This project is part of the material for the book
+El simulador está inspirado en el Problem J de la ICPC World Finals 2025, pero extiende la complejidad original añadiendo la gestión de tapas (lids) con comportamientos específicos para interactuar con las tazas (cups).
 
-   Objects First with Java - A Practical Introduction using BlueJ
-   David J. Barnes and Michael Kolling
-   Pearson Education, 2002
+## Características Principales:
 
-It is discussed in chapter 1.
+El simulador permite al usuario realizar las siguientes acciones sobre una torre de tazas y tapas:
+- Gestión de la Torre: Crear la torre y consultar información (altura, elementos apilados, etc.).
+- Gestión de Tazas y Tapas: Operaciones de apilar (push), desapilar (pop) y remover (remove).
+- Reorganización: Funciones para ordenar (order), invertir (reverse), intercambiar (swap) y cubrir (cover).
+- Resolución (Solver): Funcionalidades para simular y encontrar la configuración exacta que cumpla con una altura objetivo, basándose en el problema de la maratón.
+- Interfaz Gráfica: Representación visual de la torre mediante la clase Canvas.
 
-This is a very simple project to demonstrate some characteristics of
-objects.
+## Tecnologías y Herramientas Utilizadas:
 
-You can create various shapes, and you will see, if you do, that those
-shapes are drawn on screen (in a window that we call the "canvas").
+- Lenguaje: Java
+- IDE: BlueJ, Eclipse
+- Pruebas Unitarias y de Aceptación: JUnit 4
+- Análisis Dinámico (Cobertura de Código): IDEeclipse
+- Análisis Estático (Calidad de Código): PMD
+- Modelado y Diseño: Astah
 
-You can then manipulate these objects: change their position, size and 
-colour. Try it out: create a few different squares, triangles and circles.
+## Análisis General y Decisiones de Refactoring
 
-This project is designed as a first example of object-oriented programming.
-It illustrates a number of concepts:
+Durante el ciclo de refactoring y migración a Eclipse, se llevaron a cabo los siguientes procesos:
 
- - a Java project (application) is a collection of classes
- - objects can be created from classes
- - from any one class, many objects may be created
- - objects have operations (methods)
- - operations can have parameters
- - parameters have types (at least String and int)
- - objects hold data (fields)
- - the operations and fields are common to all objects
- - the values stored in the fields can be different for each object
+- Análisis Dinámico: Se logró un porcentaje de cobertura total final de 94.2% frente al 90.4% inicial, superando la meta establecida del 75%. Para lograr este incremento, se diseñaron e implementaron nuevas pruebas unitarias enfocadas en evaluar rutas de código que inicialmente no eran alcanzadas. Esto permitió elevar la cobertura de la clase principal Tower del 86.7% al 97.8%.
+  
+- Análisis Estático:
 
-The project also demonstrates
+## Estructura de Entregables
 
- - BlueJ object creation
- - interactive method invocation
- - parameter passing
+En este repositorio se encuentran adjuntos los entregables correspondientes al cierre del proyecto:
+1. Código fuente completo.
+2. Informe del análisis dinámico (Inicial y Final).
+3. Informe del análisis estático (Inicial y Final).
+4. Diseño en Astah.
+5. Documento de Retrospectiva.
 
-A good second project to look at after this is "picture", which adds a class
-to those ones in this project. That class (named "Picture") uses the shapes
-to draw a picture. It can be used to experiment with coding.
-
-Michael Kolling, July 2000
->>>>>>> master
+---
+Autores: 
+- Natalia Andrea Rodríguez Torres
+- Daniel José Villamizar Castellanos
