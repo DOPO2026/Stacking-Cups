@@ -18,4 +18,11 @@ public abstract class StackItem {
     
     public String getType() { return type; }
     public int getNumber() { return number; }
+    public String getColor() { return color; }
+    
+    /**
+     * Retorna el subtipo del elemento ("normal" por defecto).
+     * Las subclases especializadas sobreescriben este metodo.
+     */
+    public String getSubType() { return "normal"; }
 }

@@ -2,17 +2,11 @@ package tower;
 
 import shapes.Rectangle;
 
-/**
- * Write a description of class Lid here.
- *
- * @Rodriguez-Villamizar
- * @1 (15/02/2026)
- */
 public class Lid extends StackItem {
 
-    private Rectangle figure;
-    private int x;
-    private int y;
+    protected Rectangle figure;
+    protected int x;
+    protected int y;
 
     public Lid(int number, String color) {
         super("lid", number, color);

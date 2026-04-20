@@ -45,14 +45,52 @@ public class Tower {
     }
 
     public void pushCup(int i) {
+        pushCup("normal", i);
+    }
+
+    /**
+     * Agrega una taza del tipo especificado.
+     * @param type tipo de taza: "normal", "opener", "hierarchical", "magnetic"
+     * @param i numero de la taza
+     */
+    public void pushCup(String type, int i) {
         if (!containsItem("cup", i)) {
             String[] colores = {"red", "yellow", "blue", "green", "magenta", "black"};
             String color = colores[i % colores.length];
             
-            Cup nuevaTaza = new Cup(i, color);
-            items.add(nuevaTaza);   
+            Cup nuevaTaza;
+            switch (type.toLowerCase()) {
+                case "opener":
+                    nuevaTaza = new OpenerCup(i, color);
+                    break;
+                case "hierarchical":
+                    nuevaTaza = new HierarchicalCup(i, color);
+                    break;
+                case "magnetic":
+                    nuevaTaza = new MagneticCup(i, color);
+                    break;
+                default:
+                    nuevaTaza = new Cup(i, color);
+                    break;
+            }
+            
+            // Logica especial segun tipo
+            if (nuevaTaza instanceof OpenerCup) {
+                applyOpenerLogic(nuevaTaza);
+            }
+            
+            if (nuevaTaza instanceof HierarchicalCup) {
+                applyHierarchicalLogic((HierarchicalCup) nuevaTaza);
+            } else {
+                items.add(nuevaTaza);
+            }
+            
+            // Magnetic: atrae su tapa companera justo encima
+            if (nuevaTaza instanceof MagneticCup) {
+                applyMagneticLogic(nuevaTaza);
+            }
+            
             if (isVisible) nuevaTaza.makeVisible();
-
             ok = true;
             updateDisplay();
         } else {
@@ -61,10 +99,75 @@ public class Tower {
         }
     }
     
+    /**
+     * Opener: elimina todas las tapas de tazas mas pequenas que le impiden el paso.
+     */
+    private void applyOpenerLogic(Cup opener) {
+        List<StackItem> toRemove = new ArrayList<>();
+        for (StackItem item : items) {
+            if (item.getType().equals("lid") && item.getNumber() < opener.getNumber()) {
+                item.makeInvisible();
+                toRemove.add(item);
+            }
+        }
+        items.removeAll(toRemove);
+    }
+    
+    /**
+     * Hierarchical: desplaza objetos de menor tamano hacia arriba.
+     * Si logra llegar al fondo (posicion 0), se ancla.
+     */
+    private void applyHierarchicalLogic(HierarchicalCup cup) {
+        // Buscar posicion: desplaza todos los menores
+        int insertPos = items.size(); // por defecto al final
+        for (int j = items.size() - 1; j >= 0; j--) {
+            StackItem item = items.get(j);
+            if (item.getNumber() < cup.getNumber()) {
+                insertPos = j; // puede pasar este item
+            } else {
+                break; // no puede pasar un item de mayor o igual tamano
+            }
+        }
+        items.add(insertPos, cup);
+        
+        if (insertPos == 0) {
+            cup.anchor();
+        }
+    }
+    
+    /**
+     * Magnetic: si la tapa companera esta en la torre, la mueve justo
+     * despues de esta taza y la marca como tapada.
+     */
+    private void applyMagneticLogic(Cup magnetic) {
+        int cupIndex = items.indexOf(magnetic);
+        // Buscar tapa companera
+        for (int j = 0; j < items.size(); j++) {
+            StackItem item = items.get(j);
+            if (item.getType().equals("lid") && item.getNumber() == magnetic.getNumber()) {
+                // Remover la tapa de su posicion actual
+                items.remove(j);
+                // Ajustar indice de la taza si se removio antes
+                int newCupIndex = items.indexOf(magnetic);
+                // Insertar justo despues de la taza
+                items.add(newCupIndex + 1, item);
+                // Tapar la taza
+                magnetic.cover();
+                break;
+            }
+        }
+    }
+    
     public void popCup() {
         boolean found = false;
         for (int j = items.size() - 1; j >= 0; j--) {
             if (items.get(j).type.equals("cup")) {
+                // Hierarchical anclada no se puede quitar
+                if (items.get(j) instanceof HierarchicalCup 
+                    && ((HierarchicalCup) items.get(j)).isAnchored()) {
+                    continue;
+                }
+                items.get(j).makeInvisible();
                 items.remove(j);
                 found = true;
                 break;
@@ -76,31 +179,80 @@ public class Tower {
             updateDisplay();
         } else {
             ok = false;
-            showError("No hay tazas para eliminar de la torre.");
+            showError("No hay tazas removibles en la torre.");
         }
     }
 
 
     public void removeCup(int i) {
-        ok = items.removeIf(item -> item.type.equals("cup") && item.number == i);
+        boolean found = false;
+        for (int j = 0; j < items.size(); j++) {
+            if (items.get(j).type.equals("cup") && items.get(j).number == i) {
+                // Hierarchical anclada no se puede quitar
+                if (items.get(j) instanceof HierarchicalCup 
+                    && ((HierarchicalCup) items.get(j)).isAnchored()) {
+                    ok = false;
+                    showError("La taza " + i + " esta anclada y no se puede remover.");
+                    return;
+                }
+                items.get(j).makeInvisible();
+                items.remove(j);
+                found = true;
+                break;
+            }
+        }
+        ok = found;
         if (ok) {
             updateDisplay();
         } else {
-            showError("No se pudo remover: La taza " + i + " no existe."); 
+            showError("No se pudo remover: La taza " + i + " no existe.");
         }
     }
 
     public void pushLid(int i) {
+        pushLid("normal", i);
+    }
+
+    /**
+     * Agrega una tapa del tipo especificado.
+     * @param type tipo de tapa: "normal", "fearful", "crazy"
+     * @param i numero de la tapa
+     */
+    public void pushLid(String type, int i) {
         if (!containsItem("lid", i)) {
             String[] colores = {"red", "yellow", "blue", "green", "magenta", "black"};
             String color = colores[i % colores.length];
 
-            // Ahora creamos una Lid (que es un StackItem)
-            Lid nuevaTapa = new Lid(i, color);
-            items.add(nuevaTapa);
+            Lid nuevaTapa;
+            switch (type.toLowerCase()) {
+                case "fearful":
+                    nuevaTapa = new FearfulLid(i, color);
+                    break;
+                case "crazy":
+                    nuevaTapa = new CrazyLid(i, color);
+                    break;
+                default:
+                    nuevaTapa = new Lid(i, color);
+                    break;
+            }
+
+            // Fearful: no entra si su taza companera no esta
+            if (nuevaTapa instanceof FearfulLid) {
+                if (!containsItem("cup", i)) {
+                    ok = false;
+                    showError("Tapa fearful " + i + ": su taza no esta en la torre.");
+                    return;
+                }
+            }
+
+            // Crazy: se inserta en la base (posicion 0)
+            if (nuevaTapa instanceof CrazyLid) {
+                items.add(0, nuevaTapa);
+            } else {
+                items.add(nuevaTapa);
+            }
+
             if (isVisible) nuevaTapa.makeVisible();
-
-
             ok = true;
             updateDisplay();
         } else {
@@ -112,6 +264,14 @@ public class Tower {
     public void popLid() {
         for (int j = items.size() - 1; j >= 0; j--) {
             if (items.get(j).type.equals("lid")) {
+                // Fearful tapando a su taza no se puede quitar
+                if (items.get(j) instanceof FearfulLid) {
+                    Cup cup = findCup(items.get(j).number);
+                    if (cup != null && cup.isCovered()) {
+                        continue;
+                    }
+                }
+                items.get(j).makeInvisible();
                 items.remove(j);
                 ok = true;
                 updateDisplay();
@@ -119,12 +279,29 @@ public class Tower {
             }
         }
         ok = false;
-        showError("No hay tapas para eliminar de la torre.");
+        showError("No hay tapas removibles en la torre.");
     }
 
     public void removeLid(int i) {
-        ok = items.removeIf(item -> item.type.equals("lid") && item.number == i);
-        if (ok) updateDisplay();
+        for (int j = 0; j < items.size(); j++) {
+            if (items.get(j).type.equals("lid") && items.get(j).number == i) {
+                // Fearful tapando a su taza no sale
+                if (items.get(j) instanceof FearfulLid) {
+                    Cup cup = findCup(i);
+                    if (cup != null && cup.isCovered()) {
+                        ok = false;
+                        showError("La tapa fearful " + i + " esta tapando a su taza y no se puede remover.");
+                        return;
+                    }
+                }
+                items.get(j).makeInvisible();
+                items.remove(j);
+                ok = true;
+                updateDisplay();
+                return;
+            }
+        }
+        ok = false;
     }
 
     public void orderTower() {
@@ -263,6 +440,18 @@ public class Tower {
         return false;
     }
 
+    /**
+     * Busca y retorna una taza por su numero, o null si no existe.
+     */
+    private Cup findCup(int number) {
+        for (StackItem item : items) {
+            if (item.type.equals("cup") && item.number == number) {
+                return (Cup) item;
+            }
+        }
+        return null;
+    }
+
     private void showError(String message) {
         // Usar JOptionPane sólo si el simulador está visible [cite: 116, 117]
         if (isVisible) {
@@ -311,7 +500,7 @@ public class Tower {
             baseYcm[i] = currentBaseY;
         }
         
-        // Posicionamos cada item visualmente
+        // Posicionar todos los items
         for (int i = 0; i < items.size(); i++) {
             StackItem item = items.get(i);
             int heightPx = item.getHeight() * SCALE_PX;
@@ -321,7 +510,16 @@ public class Tower {
             int pixelY = BASE_Y - (baseYcm[i] * SCALE_PX) - heightPx;
             
             item.move(pixelX, pixelY);
-            item.makeVisible();
+        }
+        
+        // Renderizar de mayor a menor: las grandes primero (body+hole),
+        // luego las pequenas se dibujan dentro de los huecos
+        Integer[] renderOrder = new Integer[items.size()];
+        for (int i = 0; i < renderOrder.length; i++) renderOrder[i] = i;
+        java.util.Arrays.sort(renderOrder, (a, b) -> items.get(b).getHeight() - items.get(a).getHeight());
+
+        for (int idx : renderOrder) {
+            items.get(idx).makeVisible();
         }
     }
     
@@ -330,9 +528,9 @@ public class Tower {
      */
     private int getItemWidth(StackItem item) {
         if (item.getType().equals("cup")) {
-            return (item.getNumber() * 10) + 30;
+            return item.getNumber() * SCALE_PX * 2; // misma formula que Cup
         } else {
-            return 40; // ancho fijo de las tapas
+            return 40;
         }
     }
     

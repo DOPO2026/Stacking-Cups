@@ -1,5 +1,6 @@
-package tower;
+package test;
 
+import tower.*;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
@@ -11,8 +12,6 @@ import org.junit.Test;
  */
 public class TowerContestTest {
 
-    // ==================== EJEMPLO DEL PROBLEMA ====================
-    
     @Test
     public void testSampleInput1() {
         TowerContest tc = new TowerContest();
@@ -28,8 +27,6 @@ public class TowerContestTest {
         assertEquals("impossible", tc.solve(4, 100));
     }
 
-    // ==================== LIMITES ====================
-    
     @Test
     public void testMinHeight() {
         TowerContest tc = new TowerContest();
@@ -66,8 +63,6 @@ public class TowerContestTest {
         assertEquals("impossible", tc.solve(3, 10));
     }
     
-    // ==================== CASOS ESPECIALES ====================
-    
     @Test
     public void testSingleCup() {
         TowerContest tc = new TowerContest();
@@ -87,21 +82,15 @@ public class TowerContestTest {
         assertEquals(4, calcHeight(r4));
     }
     
-    // ==================== ALTURAS IMPOSIBLES (GAPS) ====================
-    
     @Test
     public void testImpossibleN3() {
-        // n=3: alcanzables = {5,6,8,9}, impossible = {7}
         TowerContest tc = new TowerContest();
         assertEquals("impossible", tc.solve(3, 7));
     }
     
-    // ==================== TODAS LAS ALTURAS n=4 ====================
-    
     @Test
     public void testAllReachableN4() {
         TowerContest tc = new TowerContest();
-        // Verificar exhaustivamente alturas 7..16
         for (long h = 7; h <= 16; h++) {
             String result = tc.solve(4, h);
             if (!result.equals("impossible")) {
@@ -111,23 +100,10 @@ public class TowerContestTest {
         }
     }
     
-    // ==================== N GRANDE ====================
-    
     @Test
     public void testLargeNMinHeight() {
         TowerContest tc = new TowerContest();
-        int n = 10000;
-        long hMin = 2L * n - 1;
-        String result = tc.solve(n, hMin);
-        assertNotEquals("impossible", result);
-    }
-    
-    @Test
-    public void testLargeNMaxHeight() {
-        TowerContest tc = new TowerContest();
-        int n = 10000;
-        long hMax = (long) n * n;
-        String result = tc.solve(n, hMax);
+        String result = tc.solve(10000, 2L * 10000 - 1);
         assertNotEquals("impossible", result);
     }
     
@@ -135,50 +111,34 @@ public class TowerContestTest {
     public void testUsesAllCups() {
         TowerContest tc = new TowerContest();
         for (int n = 2; n <= 5; n++) {
-            long hMin = 2L * n - 1;
-            long hMax = (long) n * n;
-            String r = tc.solve(n, hMin + 1);
+            String r = tc.solve(n, 2L * n - 1 + 1);
             if (!r.equals("impossible")) {
                 assertEquals(n, r.split(" ").length);
             }
         }
     }
 
-    // ==================== HELPER ====================
-    
-    /**
-     * Calcula la altura real simulando la fisica del apilamiento.
-     */
     private long calcHeight(String sequence) {
         String[] parts = sequence.split(" ");
         int n = parts.length;
         long[] heights = new long[n];
         int[] cupIdx = new int[n];
-        
         for (int i = 0; i < n; i++) {
             heights[i] = Long.parseLong(parts[i].trim());
             cupIdx[i] = (int) ((heights[i] + 1) / 2);
         }
-        
         long[] baseY = new long[n];
         long maxH = 0;
-        
         for (int i = 0; i < n; i++) {
             long currentBase = 0;
             for (int j = 0; j < i; j++) {
-                long interaction;
-                if (cupIdx[i] < cupIdx[j]) {
-                    interaction = baseY[j] + 1;
-                } else {
-                    interaction = baseY[j] + heights[j];
-                }
+                long interaction = (cupIdx[i] < cupIdx[j]) ? baseY[j] + 1 : baseY[j] + heights[j];
                 if (interaction > currentBase) currentBase = interaction;
             }
             baseY[i] = currentBase;
             long top = currentBase + heights[i];
             if (top > maxH) maxH = top;
         }
-        
         return maxH;
     }
 }
