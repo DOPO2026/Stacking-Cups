@@ -18,7 +18,9 @@ decisiones tomadas y el resultado final alcanzado.
 Resultado general:
 - Al  ejecutar  todas  las  clases  de  prueba  existentes  (TowerC2Test,  TowerContestTest,
 TowerC4Test,  TowerATest,  TowerCC4Test)  sobre  el  proyecto,  se  obtuvo  el  siguiente
-resultado inicial:
+
+![Captura]
+(Picture1.png)
 
 ## Análisis:
 ## Total: 90.4%
@@ -30,9 +32,11 @@ Este resultado inicial ya supera el 75% requerido. Aun así, analizamos el resul
 cada clase, y se identificaron faltas de cobertura en algunas partes.
 
 Resultado por clase:
-
+![Captura]
+(Picture2.png)
 Analisis de resultados:
-
+![Captura]
+(Picture3.png)
 Las clases con mayor cantidad de instrucciones sin cubrir en el paquete de dominio fueron:
 
 - Tower (86.7%): 204 instrucciones sin cubrir. Siendo la clase principal del proyecto con
@@ -80,9 +84,12 @@ exactamente las tazas que tienen su tapa presente cuando hay múltiples.
 visualización.
 
 ## 3. Resultado Final
+![Captura]
+(Picture4.png)
 
 Analisis - Tabla comparativa:
-
+![Captura]
+(Picture5.png)
 
 El aumento de 3.8% en cobertura total refleja la efectividad de las nuevas pruebas. El aumento
 de instrucciones totales (+615) se debe a que las pruebas adicionales ejecutan rutas de código
