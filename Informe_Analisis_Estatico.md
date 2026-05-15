@@ -55,5 +55,5 @@ Tras las intervenciones, se ejecutó un segundo escaneo de validación (informe_
 El proceso de análisis estático y refactorización ha transformado el proyecto de una implementación funcional a una solución robusta alineada con los estándares de la industria. La eliminación de riesgos de punteros nulos y el desacoplamiento de clases aseguran que el software sea escalable y fácil de mantener para futuras iteraciones.
 
 **Anexos:**
-* [Reporte Inicial PMD](./informe_inicial_pmd.txt)
-* [Reporte Final de Verificación](./informe_final_pmd.txt)
+* [Reporte Inicial PMD](./recursos_estatico/informe_inicial_pmd.txt)
+* [Reporte Final de Verificación](./recursos_estatico/informe_final_pmd.txt)

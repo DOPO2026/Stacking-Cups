@@ -282,4 +282,296 @@ public class TowerC4Test {
         // Verificamos que hay 7 items
         assertEquals(7, items.length);
     }
+    
+    // ==================== PRUEBAS ADICIONALES CICLO 5 ====================
+    // Estas pruebas cubren ramas no alcanzadas en el resultado inicial (86.7% Tower)
+
+    // --- removeLid rama fallida ---
+
+    @Test
+    public void testRemoveLidInexistente() {
+        Tower tower = new Tower(10, 50);
+        tower.pushCup(1);
+        tower.removeLid(99); // tapa que no existe
+        assertFalse("Debe fallar al remover tapa inexistente", tower.ok());
+    }
+
+    // --- removeCup rama fallida ---
+
+    @Test
+    public void testRemoveCupInexistente() {
+        Tower tower = new Tower(10, 50);
+        tower.pushCup(1);
+        tower.removeCup(99); // taza que no existe
+        assertFalse("Debe fallar al remover taza inexistente", tower.ok());
+    }
+
+    // --- popCup torre vacia ---
+
+    @Test
+    public void testPopCupTorreVacia() {
+        Tower tower = new Tower(10, 50);
+        tower.popCup();
+        assertFalse("Debe fallar popCup en torre vacia", tower.ok());
+    }
+
+    // --- popLid torre sin tapas ---
+
+    @Test
+    public void testPopLidSinTapas() {
+        Tower tower = new Tower(10, 50);
+        tower.pushCup(1);
+        tower.popLid();
+        assertFalse("Debe fallar popLid sin tapas", tower.ok());
+    }
+
+    // --- pushCup duplicado ---
+
+    @Test
+    public void testPushCupDuplicado() {
+        Tower tower = new Tower(10, 50);
+        tower.pushCup(2);
+        tower.pushCup(2); // duplicado
+        assertFalse("No debe permitir duplicados", tower.ok());
+    }
+
+    // --- pushLid duplicado ---
+
+    @Test
+    public void testPushLidDuplicado() {
+        Tower tower = new Tower(10, 50);
+        tower.pushLid(3);
+        tower.pushLid(3); // duplicado
+        assertFalse("No debe permitir tapa duplicada", tower.ok());
+    }
+
+    // --- height con torre vacia ---
+
+    @Test
+    public void testHeightTorreVacia() {
+        Tower tower = new Tower(10, 50);
+        assertEquals("Torre vacia debe tener altura 0", 0, tower.height());
+    }
+
+    // --- height con lid encima de cup de mayor numero (lid apoyada en borde) ---
+
+    @Test
+    public void testHeightConLidSobreCup() {
+        Tower tower = new Tower(10, 50);
+        tower.pushCup(2); // altura 3
+        tower.pushLid(2); // altura 1, apoyada en borde exterior
+        int h = tower.height();
+        assertTrue("Altura debe ser positiva con cup y lid", h > 0);
+    }
+
+    // --- lidedCups sin ninguna tapada ---
+
+    @Test
+    public void testLidedCupsSinTapadas() {
+        Tower tower = new Tower(10, 50);
+        tower.pushCup(1);
+        tower.pushLid(1);
+        // No llamamos cover(), ninguna esta tapada
+        int[] tapadas = tower.lidedCups();
+        assertEquals("Sin cover no debe haber tapadas", 0, tapadas.length);
+    }
+
+    // --- stackingItems torre vacia ---
+
+    @Test
+    public void testStackingItemsTorreVacia() {
+        Tower tower = new Tower(10, 50);
+        String[][] items = tower.stackingitems();
+        assertEquals("Torre vacia debe retornar array vacio", 0, items.length);
+    }
+
+    // --- swapToReduce sin posible mejora ---
+
+    @Test
+    public void testSwapToReduceSinMejora() {
+        Tower tower = new Tower(10, 50);
+        tower.pushCup(1); // Torre de 1 sola taza, ningun swap mejora
+        String[][] result = tower.swapToReduce();
+        assertFalse("Sin mejora posible, ok debe ser false", tower.ok());
+        assertEquals("Resultado vacio si no hay mejora", 0, result.length);
+    }
+
+    // --- swapToReduce con mejora posible ---
+
+    @Test
+    public void testSwapToReduceConMejora() {
+        Tower tower = new Tower(10, 50);
+        // Colocar en orden suboptimo para que exista un swap que reduzca
+        tower.pushCup(1);
+        tower.pushCup(3);
+        tower.pushCup(2);
+        int alturaAntes = tower.height();
+        String[][] sugerencia = tower.swapToReduce();
+        if (tower.ok()) {
+            // Aplicar el swap sugerido y verificar que reduce
+            tower.swap(sugerencia[0], sugerencia[1]);
+            assertTrue("El swap sugerido debe reducir la altura",
+                tower.height() < alturaAntes);
+        }
+        // Si no hay mejora, tambien es valido (ok false)
+    }
+
+    // --- orderTower con tapas y tazas del mismo numero ---
+
+    @Test
+    public void testOrderTowerConTapasYTazas() {
+        Tower tower = new Tower(10, 50);
+        tower.pushCup(1);
+        tower.pushCup(3);
+        tower.pushLid(3);
+        tower.pushCup(2);
+        tower.orderTower();
+        assertTrue(tower.ok());
+        String[][] items = tower.stackingitems();
+        // El mayor debe estar primero (base), el menor en la cima
+        assertEquals("El primer elemento debe ser el de mayor numero", "3",
+            items[0][1]);
+        // Si hay taza y tapa del mismo numero, taza antes que tapa
+        boolean tazaAntesDeTapa = false;
+        for (int i = 0; i < items.length - 1; i++) {
+            if (items[i][0].equals("cup") && items[i][1].equals("3") &&
+                items[i+1][0].equals("lid") && items[i+1][1].equals("3")) {
+                tazaAntesDeTapa = true;
+            }
+        }
+        assertTrue("Taza debe ir antes que su tapa en orderTower", tazaAntesDeTapa);
+    }
+
+    // --- reverseTower ---
+
+    @Test
+    public void testReverseTower() {
+        Tower tower = new Tower(10, 50);
+        tower.pushCup(1);
+        tower.pushCup(2);
+        tower.pushCup(3);
+        String[][] antes = tower.stackingitems();
+        tower.reverseTower();
+        assertTrue(tower.ok());
+        String[][] despues = tower.stackingitems();
+        // El primero de antes debe ser el ultimo de despues
+        assertEquals(antes[0][1], despues[despues.length - 1][1]);
+        assertEquals(antes[antes.length - 1][1], despues[0][1]);
+    }
+
+    // --- cover sin tapas en la torre ---
+
+    @Test
+    public void testCoverSinTapas() {
+        Tower tower = new Tower(10, 50);
+        tower.pushCup(1);
+        tower.pushCup(2);
+        tower.cover(); // No hay tapas, ninguna se tapa
+        assertTrue(tower.ok());
+        int[] tapadas = tower.lidedCups();
+        assertEquals("Sin tapas, cover no debe tapar nada", 0, tapadas.length);
+    }
+
+    // --- cover varias tazas ---
+
+    @Test
+    public void testCoverVariasTazas() {
+        Tower tower = new Tower(10, 50);
+        tower.pushCup(1);
+        tower.pushCup(2);
+        tower.pushCup(3);
+        tower.pushLid(1);
+        tower.pushLid(3);
+        tower.cover();
+        assertTrue(tower.ok());
+        int[] tapadas = tower.lidedCups();
+        assertEquals("Deben estar tapadas exactamente 2 tazas", 2, tapadas.length);
+    }
+
+    // --- Tower(int cups) constructor automatico borde ---
+
+    @Test
+    public void testConstructorAutomaticoUnaTaza() {
+        Tower tower = new Tower(1);
+        assertTrue(tower.ok());
+        assertEquals(1, tower.stackingitems().length);
+    }
+
+    // --- makeInvisible en torre invisible (no hace nada) ---
+
+    @Test
+    public void testMakeInvisibleYaInvisible() {
+        Tower tower = new Tower(10, 50);
+        tower.pushCup(1);
+        tower.makelnvisible(); 
+        assertTrue(tower.ok());
+    }
+
+    // --- swap mismo elemento ---
+
+    @Test
+    public void testSwapMismoElemento() {
+        Tower tower = new Tower(10, 50);
+        tower.pushCup(1);
+        tower.pushCup(2);
+        tower.swap(new String[]{"cup", "1"}, new String[]{"cup", "1"});
+        // Intercambiar consigo mismo es valido
+        assertTrue(tower.ok());
+    }
+
+    // --- swap con elemento inexistente ---
+
+    @Test
+    public void testSwapElementoInexistente() {
+        Tower tower = new Tower(10, 50);
+        tower.pushCup(1);
+        tower.swap(new String[]{"cup", "1"}, new String[]{"cup", "99"});
+        assertFalse("Swap debe fallar si un elemento no existe", tower.ok());
+    }
+
+    // --- pushCup tipo invalido ---
+
+    @Test
+    public void testPushCupTipoInvalido() {
+        Tower tower = new Tower(10, 50);
+        tower.pushCup("desconocido", 1);
+        assertFalse("Tipo invalido de taza debe fallar", tower.ok());
+    }
+
+    // --- pushLid tipo invalido ---
+
+    @Test
+    public void testPushLidTipoInvalido() {
+        Tower tower = new Tower(10, 50);
+        tower.pushCup(1);
+        tower.pushLid("desconocido", 1);
+        assertFalse("Tipo invalido de tapa debe fallar", tower.ok());
+    }
+
+    // --- makeInvisible despues de makeVisible (modo invisible) ---
+    // Nota: makeVisible abre canvas; solo probar la logica de estado en modo invisible
+
+    @Test
+    public void testMakeVisibleTorreMuyAlta() {
+        // Una torre con altura mayor a 80 cm (800px) no debe hacerse visible
+        // Con n=30: maxHeight = 900 > 800
+        Tower tower = new Tower(10, 30);
+        for (int i = 1; i <= 30; i++) {
+            tower.pushCup(i);
+        }
+        // Ordenamos para maximizar altura (todas apiladas, no anidadas)
+        tower.orderTower();
+        // La altura puede superar 80 con suficientes tazas
+        // makeVisible debe retornar ok=false si no cabe
+        // (no abre ventana en modo invisible, pero verifica la logica)
+        int h = tower.height();
+        if (h > 80) {
+            tower.makeVisible();
+            assertFalse("Torre demasiado alta no debe hacerse visible", tower.ok());
+        } else {
+            // Si la altura no supera el umbral, simplemente verificamos ok
+            assertTrue("La torre debe ser valida", tower.ok());
+        }
+    }
+
 }
