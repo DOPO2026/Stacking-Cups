@@ -65,9 +65,13 @@ public class Tower {
                 case "magnetic":
                     nuevaTaza = new MagneticCup(i, color);
                     break;
-                default:
+                case "normal":
                     nuevaTaza = new Cup(i, color);
                     break;
+                default:
+                    ok = false;
+                    showError("Tipo de taza invalido: " + type);
+                    return;
             }
             
             if (nuevaTaza instanceof OpenerCup) {
@@ -203,9 +207,13 @@ public class Tower {
                 case "crazy":
                     nuevaTapa = new CrazyLid(i, color);
                     break;
-                default:
+                case "normal":
                     nuevaTapa = new Lid(i, color);
                     break;
+                default:
+                    ok = false;
+                    showError("Tipo de tapa invalido: " + type);
+                    return;
             }
 
             if (nuevaTapa instanceof FearfulLid) {
